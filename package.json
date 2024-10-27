@@ -1,0 +1,20 @@
+{
+    "name": "managedservices",
+    "version": "1.0.0",
+    "description": "creates a report about managed services projects",
+    "main": "index.js",
+    "dependencies": {
+        "axios": "^0.27.2",
+        "dotenv": "^16.0.3",
+        "nodemailer": "^6.9.1",
+        "underscore": "^1.13.6"
+    },
+    "scripts": {
+        "start": "node ./index.js"
+    },
+    "engines": {
+        "node": ">=17",
+        "npm": ">=8"
+    },
+    "author": "Scott Rini"
+}

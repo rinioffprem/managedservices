@@ -4,5 +4,4 @@ node_modules
 log.txt
 reports/*
 logs/*
-*.json
 *.log

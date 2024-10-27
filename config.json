@@ -1,0 +1,13 @@
+{
+    "logfile": "logs/log",
+    "logtimestamp": true,
+    "display_log": true,
+    "send_email": true,
+    "call_delay": 500,
+    "output": "reports/managed_services",
+    "output_usedate": true,
+    "budget_arguments": "is_active=true",
+    "email_from": "notifications@lucid-reality.com",
+    "email_recipient": "harvestreports@offprem.tech"
+    
+}
