@@ -9,7 +9,7 @@ const nodemailer = require('nodemailer');
 
 const headers = [
     'Client Name', 'Vertical', 'Project Name', 'Budget', 'Monthly Budget',
-    'Budget Spent', 'Budget Remaining', '% Used', "% Remaining"
+    'Budget Spent', 'Budget Remaining', '% Used', "% Remaining", 'At Risk'
 ];
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -19,6 +19,7 @@ const userAgent = `Offprem automated report (scott.rini@offprem.tech)`;
 
 
 const today = new Date();
+today.setHours(0, 0, 0, 0);
 const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 const firstDayFormatted = firstDayOfMonth.toISOString().split('T')[0];
 
@@ -59,6 +60,18 @@ retrieveBudgetReport()
 function roundDecimal(number) {
     return Math.round((number + Number.EPSILON) * 100) / 100
 }
+
+function getWeekOfMonth(date) {
+    const dayOfMonth = date.getDate();
+    const dayOfWeek = date.getDay(); // Sunday = 0
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    return Math.ceil((dayOfMonth + firstDayOfMonth) / 7);
+}
+
+function isThirdWeekOrLater(date) {
+    return getWeekOfMonth(date) >= 3;
+}
+
 
 function csvLine(array) {
     array = array.map(element => `"${element}"`);
@@ -171,12 +184,26 @@ async function finalReport() {
     debugLog(`Writing ${projects.length} rows`);
     for (let i = 0; i < projects.length; i++) {
         const project = projects[i];
+
+        const percentUsed = roundDecimal((project.budget_spent / project.budget) * 100);
+        const percentRemaining = roundDecimal((project.budget_remaining / project.budget) * 100);
+
+        const atRisk = isThirdWeekOrLater(today) && (percentUsed <= 75) ? 'true' : 'false';
+
         reportFile.write(csvLine([
-            project.client_name, project.projectCode || '', project.project_name, project.budget,
-            (project.budget_is_monthly ? 'Y' : 'N'), project.budget_spent,
-            project.budget_remaining, roundDecimal((project.budget_spent / project.budget) * 100),
-            roundDecimal((project.budget_remaining / project.budget) * 100)
+            project.client_name,
+            project.projectCode || '',
+            project.project_name,
+            project.budget,
+            (project.budget_is_monthly ? 'Y' : 'N'),
+            project.budget_spent,
+            project.budget_remaining,
+            percentUsed,
+            percentRemaining,
+            atRisk
         ]));
+
+
     }
 
     
