@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 
 
 const headers = [
-    'Client Name', 'Vertical', 'Project Name', 'Budget', 'Monthly Budget',
+    'Client Name', 'Vertical', 'Days Open', 'Project Name', 'Budget', 'Monthly Budget',
     'Budget Spent', 'Budget Remaining', '% Used', "% Remaining", 'At Risk'
 ];
 
@@ -167,6 +167,17 @@ async function retrieveProjectCodeForProject(project) {
     }).then((res) => {
         project.projectCode = res.data.code || '';
 
+        project.created_at = res.data.created_at || null;
+        if (project.created_at) {
+            const created = new Date(project.created_at);
+            created.setHours(0, 0, 0, 0);
+            const msPerDay = 24 * 60 * 60 * 1000;
+            const diff = today.getTime() - created.getTime();
+            project.daysOpen = Math.max(0, Math.floor(diff / msPerDay));
+        } else {
+            project.daysOpen = 'N/A';
+        }
+
         debugLog(`received ${res.data.code} for ${res.data.name}`);
 
         
@@ -193,6 +204,7 @@ async function finalReport() {
         reportFile.write(csvLine([
             project.client_name,
             project.projectCode || '',
+            project.daysOpen ?? '',
             project.project_name,
             project.budget,
             (project.budget_is_monthly ? 'Y' : 'N'),
